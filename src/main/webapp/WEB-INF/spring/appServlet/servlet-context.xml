@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:context="http://www.springframework.org/schema/context"
+             xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+                                 http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+                                 http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
-</beans>
+    <!-- 1. 어노테이션 기능 활성화 -->
+    <annotation-driven />
+
+    <!-- 2. 정적 리소스 경로 매핑 -->
+    <!-- /resources/** 로 들어오는 요청을 /resources/ 폴더에서 찾음 -->
+    <resources mapping="/resources/**" location="/resources/" />
+
+    <!-- 3. View Resolver 설정 (JSP 파일 위치) -->
+    <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <beans:property name="prefix" value="/WEB-INF/views/" />
+        <beans:property name="suffix" value=".jsp" />
+    </beans:bean>
+
+    <!-- 4. 컴포넌트 스캔 (Controller 탐색) -->
+    <context:component-scan base-package="org.example.mavenguard.controller" />
+
+</beans:beans>
