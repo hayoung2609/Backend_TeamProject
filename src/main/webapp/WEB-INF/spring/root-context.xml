@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+                           http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Root Context: 모든 서블릿이 공유하는 최상위 설정 (DB, Service, Repository 등) -->
+
+    <!-- 1. DB 연결 설정 (HikariCP) -->
+    <!-- driverClassName, url, username, password를 본인 환경에 맞게 수정하세요 -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.mariadb.jdbc.Driver" />
+        <property name="jdbcUrl" value="jdbc:mariadb://walab.handong.edu:3306/mavenguard" />
+        <property name="username" value="W25_22400011" />
+        <property name="password" value="Odh6ec" />
+    </bean>
+
+    <!-- 2. MyBatis SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- Mapper XML 파일이 있다면 아래 주석 해제 후 경로 설정 -->
+        <!-- <property name="mapperLocations" value="classpath:mappers/*.xml" /> -->
+    </bean>
+
+    <!-- 3. MyBatis Mapper 스캔 -->
+    <!-- [중요] Mapper Interface가 있는 패키지명으로 수정 필수! -->
+    <mybatis-spring:scan base-package="org.example.repository"/>
+
+    <!-- 4. Service 컴포넌트 스캔 -->
+    <!-- [중요] Service 클래스가 있는 패키지명으로 수정 필수! -->
+    <context:component-scan base-package="org.example.service" />
+
+</beans>
