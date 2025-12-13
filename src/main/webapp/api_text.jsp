@@ -2,126 +2,175 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MavenGuard API Test</title>
+  <title>MavenGuard 통합 테스트</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f9f9f9; }
-    h1 { color: #333; }
     .box { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     h3 { margin-top: 0; color: #555; }
-    button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 14px; transition: background 0.2s; }
+    button { padding: 8px 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
     button:hover { background: #0056b3; }
-    pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; overflow-x: auto; font-family: Consolas, monospace; }
-    input[type="text"] { padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-
-    /* 검색 결과 스타일 */
-    .result-list { list-style: none; padding: 0; margin-top: 15px; max-height: 300px; overflow-y: auto; border: 1px solid #eee; }
-    .result-item { padding: 10px; border-bottom: 1px solid #eee; background: white; }
-    .result-item:last-child { border-bottom: none; }
-    .result-item:hover { background-color: #f0f7ff; }
-    .artifact-name { font-weight: bold; color: #007bff; font-size: 1.1em; }
-    .group-name { color: #666; font-size: 0.9em; }
-    .version-badge { background: #28a745; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin-left: 10px; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    input[type="text"], textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    textarea { height: 100px; font-family: monospace; font-size: 12px; }
+    .result-area { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; margin-top: 10px; min-height: 50px; font-family: monospace; }
+    .safe { color: #28a745; font-weight: bold; }
+    .danger { color: #dc3545; font-weight: bold; }
+    ul { padding-left: 20px; margin: 0; }
+    li { margin-bottom: 5px; }
   </style>
 </head>
 <body>
-<h1>🛡️ MavenGuard API 통합 테스트</h1>
+<h1>🛡️ MavenGuard 기능별 테스트</h1>
 
-<!-- 0. 라이브러리 검색 테스트 (NEW) -->
+<!-- 1. 라이브러리 검색 (NEW) -->
 <div class="box">
-  <h3>0. 라이브러리 검색 (GET /api/libraries/search)</h3>
-  <p>Maven Central에서 실제 라이브러리를 검색합니다.</p>
+  <h3>🔍 1. 라이브러리 검색 (Maven Central API)</h3>
+  <p>키워드로 Maven Central의 라이브러리를 검색합니다. (백엔드에서 외부 API 호출)</p>
   <div style="display: flex; gap: 10px;">
-    <input type="text" id="keyword" placeholder="검색어 입력 (예: spring-web, mybatis)" onkeypress="if(event.keyCode==13) searchLibraries()"/>
-    <button onclick="searchLibraries()">검색 🔍</button>
+    <input type="text" id="searchKeyword" placeholder="검색어 입력 (예: spring-boot, mybatis)" onkeypress="if(event.keyCode==13) searchLib()"/>
+    <button onclick="searchLib()">검색</button>
   </div>
-  <div id="searchResult"></div>
+  <div id="searchResult" class="result-area">결과 대기 중...</div>
 </div>
 
-<!-- 1. Kit 저장 테스트 -->
+<!-- 2. pom.xml 파싱 -->
 <div class="box">
-  <h3>1. Kit 저장 테스트 (POST /api/kits)</h3>
-  <p>아래 버튼을 누르면 테스트 데이터('쇼핑몰 프로젝트용 Kit')를 DB에 저장합니다.</p>
-  <button onclick="createKit()">Kit 저장하기 💾</button>
-  <div id="createResult" style="margin-top: 10px;"></div>
+  <h3>📝 2. pom.xml 붙여넣기 분석</h3>
+  <p>pom.xml의 &lt;dependencies&gt; 부분을 붙여넣으세요.</p>
+  <textarea id="pomInput" placeholder="<dependency>...</dependency> 태그들을 붙여넣으세요."></textarea>
+  <button onclick="parsePom()">분석하기</button>
+  <div id="parseResult" class="result-area">결과 대기 중...</div>
 </div>
 
-<!-- 2. 내 Kit 조회 테스트 -->
+<!-- 3. Kit 저장 -->
 <div class="box">
-  <h3>2. 내 Kit 조회 테스트 (GET /api/kits/my)</h3>
-  <p>DB에 저장된 Kit 목록을 JSON 형태로 불러옵니다.</p>
-  <button onclick="getMyKits()">목록 불러오기 📂</button>
-  <pre id="getResult">결과가 여기에 표시됩니다...</pre>
+  <h3>💾 3. Kit 저장 (DB)</h3>
+  <button onclick="createKit()">테스트 데이터 저장</button>
+  <div id="dbResult" class="result-area">결과 대기 중...</div>
+</div>
+
+<!-- 4. 보안 진단 (개별 테스트) -->
+<div class="box">
+  <h3>🧪 4. 보안 진단 단위 테스트 (OSV API)</h3>
+  <p>특정 버전의 취약점을 수동으로 검사합니다. (예: log4j-core 2.14.1)</p>
+  <input type="text" id="secGroup" placeholder="GroupId" value="org.apache.logging.log4j">
+  <input type="text" id="secArtifact" placeholder="ArtifactId" value="log4j-core">
+  <input type="text" id="secVersion" placeholder="Version" value="2.14.1">
+  <button class="secondary" onclick="checkSecurity()">진단 실행</button>
+  <div id="secResult" class="result-area">결과 대기 중...</div>
 </div>
 
 <script>
-  // 0. 검색 요청 (AJAX)
-  function searchLibraries() {
-    const keyword = document.getElementById('keyword').value;
-    if(!keyword) { alert('검색어를 입력하세요'); return; }
+  // Context Path 자동 감지 (JSP가 아니어도 작동하도록 JS로 처리)
+  // 예: http://localhost:8080/MavenGuard/api/... -> /MavenGuard
+  const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 1));
+  // 만약 루트 경로(/)에 배포된 경우 빈 문자열 처리
+  const apiBase = (contextPath === "/api_text.jsp" || contextPath === "") ? "" : contextPath;
 
-    const resultDiv = document.getElementById('searchResult');
-    resultDiv.innerHTML = "<p>검색중...</p>";
+  console.log("API Base URL:", apiBase); // 디버깅용
 
-    fetch('/api/libraries/search?q=' + encodeURIComponent(keyword))
-            .then(response => {
-              if (!response.ok) throw new Error("서버 에러 (혹시 컨트롤러 만들었나요?)");
-              return response.json();
-            })
-            .then(json => {
-              let html = '<ul class="result-list">';
-              if(json.length === 0) {
-                html = "<p style='padding:10px; color:red;'>검색 결과가 없습니다.</p>";
-              } else {
-                json.forEach(lib => {
-                  html += '<li class="result-item">' +
-                          '<span class="artifact-name">' + lib.artifactId + '</span>' +
-                          '<span class="version-badge">' + lib.latestVersion + '</span><br>' +
-                          '<span class="group-name">GroupId: ' + lib.groupId + '</span>' +
-                          '</li>';
-                });
-                html += '</ul>';
+  // 1. 검색 기능
+  function searchLib() {
+    const q = document.getElementById('searchKeyword').value;
+    if(!q) return alert("검색어를 입력하세요");
+
+    document.getElementById('searchResult').innerText = "검색중...";
+
+    // 수정된 부분: apiBase + 경로
+    fetch(apiBase + '/api/libraries/search?q=' + encodeURIComponent(q))
+            .then(res => {
+              // 응답이 HTML(에러페이지)인지 확인
+              const contentType = res.headers.get("content-type");
+              if (contentType && contentType.indexOf("application/json") === -1) {
+                return res.text().then(text => { throw new Error("서버 에러 (HTML 응답): " + text.substring(0, 100) + "..."); });
               }
+              if (!res.ok) throw new Error("HTTP 오류: " + res.status);
+              return res.json();
+            })
+            .then(data => {
+              const resultDiv = document.getElementById('searchResult');
+              if(data.length === 0) {
+                resultDiv.innerHTML = "검색 결과가 없습니다.";
+                return;
+              }
+              let html = "<ul>";
+              data.forEach(item => {
+                html += "<li><b>" + item.artifactId + "</b> <small>(" + item.groupId + ")</small> - <span style='color:#4caf50'>" + item.latestVersion + "</span></li>";
+              });
+              html += "</ul>";
               resultDiv.innerHTML = html;
             })
             .catch(err => {
-              resultDiv.innerHTML = "<p style='color:red; font-weight:bold;'>에러 발생: " + err + "</p>";
+              document.getElementById('searchResult').innerHTML = "<span style='color:red'>" + err + "</span>";
+              console.error(err);
             });
   }
 
-  // 1. Kit 저장 요청 (AJAX)
+  // 2. 파싱 기능
+  function parsePom() {
+    const xml = document.getElementById('pomInput').value;
+    // 수정된 부분: apiBase + 경로
+    fetch(apiBase + '/api/libraries/parse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: xml
+    })
+            .then(res => res.json())
+            .then(json => {
+              document.getElementById('parseResult').innerText = JSON.stringify(json, null, 2);
+            })
+            .catch(err => alert("파싱 실패: " + err));
+  }
+
+  // 3. 저장 기능
   function createKit() {
     const data = {
       "userId": 1,
-      "title": "쇼핑몰 프로젝트용 (테스트)",
-      "description": "스프링 MVC와 MyBatis를 사용함",
+      "title": "자동 저장 Kit",
+      "description": "테스트",
       "isPublic": true,
       "itemList": [
-        { "groupId": "org.springframework", "artifactId": "spring-webmvc", "version": "5.3.23" },
-        { "groupId": "org.mybatis", "artifactId": "mybatis", "version": "3.5.16" }
+        { "groupId": "org.springframework", "artifactId": "spring-webmvc", "version": "5.3.23" }
       ]
     };
+    // 수정된 부분: apiBase + 경로
+    fetch(apiBase + '/api/kits', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    })
+            .then(res => res.text())
+            .then(text => document.getElementById('dbResult').innerText = text)
+            .catch(err => alert("저장 실패: " + err));
+  }
 
-    fetch('/api/kits', {
+  // 4. 보안 진단
+  function checkSecurity() {
+    const data = {
+      groupId: document.getElementById('secGroup').value,
+      artifactId: document.getElementById('secArtifact').value,
+      version: document.getElementById('secVersion').value
+    };
+
+    document.getElementById('secResult').innerText = "진단 중...";
+
+    // 수정된 부분: apiBase + 경로
+    fetch(apiBase + '/api/libraries/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
-            .then(response => response.text())
-            .then(text => {
-              document.getElementById('createResult').innerHTML =
-                      '<p style="color: green; font-weight: bold;">✅ 성공: ' + text + '</p>';
-            })
-            .catch(err => alert('에러 발생: ' + err));
-  }
-
-  // 2. 조회 요청 (AJAX)
-  function getMyKits() {
-    fetch('/api/kits/my?userId=1')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(json => {
-              document.getElementById('getResult').innerText = JSON.stringify(json, null, 2);
+              const resultDiv = document.getElementById('secResult');
+              if(json.safe) {
+                resultDiv.innerHTML = "<span class='safe'>[안전]</span> " + json.message;
+              } else {
+                resultDiv.innerHTML = "<span class='danger'>[위험!]</span> 취약점 발견: " + json.count + "개<br>내용: " + json.detail;
+              }
             })
-            .catch(err => alert('에러 발생: ' + err));
+            .catch(err => alert("진단 실패: " + err));
   }
 </script>
 </body>
