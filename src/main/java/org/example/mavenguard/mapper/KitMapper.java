@@ -2,9 +2,12 @@ package org.example.mavenguard.mapper;
 
 import org.example.mavenguard.vo.KitItemVO;
 import org.example.mavenguard.vo.KitVO;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 public interface KitMapper {
+
     // 1. Kit 메인 정보 저장 (저장 후 PK인 kitId를 vo에 담아줌)
     void insertKit(KitVO kitVO);
 
@@ -16,4 +19,9 @@ public interface KitMapper {
 
     // 4. 특정 Kit의 아이템들 조회
     List<KitItemVO> selectItemsByKitId(Long kitId);
+
+    // 5. ⭐ 내 Kit인지 검증 (추가 — 이거 없어서 에러 났던 것)
+    int countMyKit(@Param("userId") Long userId,
+                   @Param("kitId") Long kitId);
 }
+
