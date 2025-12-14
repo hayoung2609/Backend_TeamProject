@@ -42,7 +42,12 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link active" href="index.jsp">홈</a></li>
-                <li class="nav-item"><a class="nav-link" href="#" onclick="checkLoginAndMove('my_kit.jsp')">나만의 Kit</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="checkLoginAndMove('/kits/my')">
+                        나만의 Kit
+                    </a>
+                </li>
+
                 <li class="nav-item ms-2" id="authSection">
                     <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="login.jsp">로그인</a>
                 </li>
@@ -165,7 +170,7 @@
                         <i class="fas fa-user-circle"></i> \${user.nickname}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="my_kit.jsp">내 보관함</a></li>
+                        <li><a class="dropdown-item" href="WEB-INF/views/my_kit.jsp">내 보관함</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="logout()">로그아웃</a></li>
                     </ul>
@@ -393,7 +398,7 @@
             .then(text => {
                 alert("✅ 성공적으로 저장되었습니다!");
                 if(confirm("보관함으로 이동해서 확인하시겠습니까?")) {
-                    location.href = 'my_kit.jsp';
+                    location.href = contextPath + '/kits/my';
                 }
             })
             .catch(err => alert("저장 실패: " + err));
