@@ -11,19 +11,19 @@
            http://www.springframework.org/schema/mvc
            https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <!-- 1️⃣ Spring MVC 어노테이션 활성화 (@Controller, @GetMapping 등) -->
+    <!-- Spring MVC 활성화 -->
     <mvc:annotation-driven />
 
-    <!-- 2️⃣ 정적 리소스 매핑 -->
+    <!-- 정적 리소스 -->
     <mvc:resources mapping="/resources/**" location="/resources/" />
 
-    <!-- 3️⃣ View Resolver (JSP 위치) -->
+    <!-- View Resolver -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/" />
         <property name="suffix" value=".jsp" />
     </bean>
 
-    <!-- 4️⃣ Controller 스캔 -->
-    <context:component-scan base-package="org.example.mavenguard.controller" />
+    <!-- 🔥 이게 핵심 -->
+    <context:component-scan base-package="org.example.mavenguard" />
 
 </beans>

@@ -389,7 +389,7 @@
             itemList: currentKitItems
         };
 
-        fetch(contextPath + '/api/kits', {
+        fetch(contextPath + '/kits', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)

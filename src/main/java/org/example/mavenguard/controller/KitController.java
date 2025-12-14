@@ -21,7 +21,7 @@ public class KitController {
 
     /**
      * ================================
-     * 1️⃣ Kit 생성 (index.jsp → 저장)
+     * 1️⃣ Kit 생성 (AJAX 저장)
      * ================================
      */
     @PostMapping
@@ -34,7 +34,7 @@ public class KitController {
             return "LOGIN_REQUIRED";
         }
 
-        // 세션에서 userId 주입 (보안상 필수)
+        // 🔒 userId는 반드시 서버에서 주입
         kitVO.setUserId(loginUser.getUserId());
 
         kitService.createKit(kitVO);
@@ -44,6 +44,7 @@ public class KitController {
     /**
      * ================================
      * 2️⃣ 나만의 Kit 목록 페이지
+     * URL : /kits/my
      * ================================
      */
     @GetMapping("/my")
@@ -58,12 +59,14 @@ public class KitController {
         List<KitVO> myKits = kitService.getMyKits(loginUser.getUserId());
         model.addAttribute("kitList", myKits);
 
-        return "my_kit"; // my_kit.jsp
+        // 👉 /WEB-INF/views/my_kit.jsp
+        return "my_kit";
     }
 
     /**
      * ================================
      * 3️⃣ Kit 상세 조회 (AJAX)
+     * URL : /kits/{kitId}
      * ================================
      */
     @GetMapping("/{kitId}")
@@ -76,7 +79,7 @@ public class KitController {
             return null;
         }
 
-        // 내 Kit인지 검증 (보안 핵심)
+        // 🔒 내 Kit인지 검증
         if (!kitService.isMyKit(loginUser.getUserId(), kitId)) {
             return null;
         }
@@ -90,3 +93,4 @@ public class KitController {
         return kit;
     }
 }
+
