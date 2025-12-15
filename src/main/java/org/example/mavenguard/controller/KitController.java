@@ -71,27 +71,25 @@ public class KitController {
      */
     @GetMapping("/{kitId}")
     @ResponseBody
-    public KitVO getKitDetail(@PathVariable Long kitId,
-                              HttpSession session) {
-
+    public KitVO getKitDetail(@PathVariable Long kitId, HttpSession session) {
         UserVO loginUser = (UserVO) session.getAttribute("loginUser");
-        if (loginUser == null) {
-            return null;
-        }
+        if (loginUser == null) return null;
 
-        // 🔒 내 Kit인지 검증
+        // 1. 내 Kit인지 검증
         if (!kitService.isMyKit(loginUser.getUserId(), kitId)) {
             return null;
         }
 
-        List<KitItemVO> items = kitService.getItems(kitId);
+        // [수정됨] 2. Kit 기본 정보 조회 (제목, 설명 등)
+        KitVO kit = kitService.getKit(kitId);
 
-        KitVO kit = new KitVO();
-        kit.setKitId(kitId);
+        // 3. 아이템(라이브러리) 목록 조회 및 설정
+        List<KitItemVO> items = kitService.getItems(kitId);
         kit.setItemList(items);
 
         return kit;
     }
+
     /**
      * ================================
      * 4️⃣ Kit 수정 (AJAX)

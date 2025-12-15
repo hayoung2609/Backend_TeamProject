@@ -16,6 +16,7 @@ public interface KitMapper {
 
     // 3. 내 Kit 목록 조회
     List<KitVO> selectKitsByUserId(Long userId);
+    KitVO selectKitById(Long kitId);
 
     // 4. 특정 Kit의 아이템들 조회
     List<KitItemVO> selectItemsByKitId(Long kitId);

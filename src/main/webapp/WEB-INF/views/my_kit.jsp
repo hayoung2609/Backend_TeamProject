@@ -93,7 +93,7 @@
 
 <nav class="navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand brand-logo" href="index.jsp">
+        <a class="navbar-brand brand-logo" href="${pageContext.request.contextPath}/">
             <span class="fa-stack" style="font-size: 0.8em;">
               <i class="fas fa-circle fa-stack-2x" style="color: rgba(59, 130, 246, 0.1);"></i>
               <i class="fas fa-shield-halved fa-stack-1x text-primary"></i>
@@ -383,7 +383,10 @@
         navigator.clipboard.writeText(xml).then(()=>showToast("XML copied to clipboard."));
     }
 
-    function logout() { location.href = contextPath + '/index.jsp'; /* 실제 로그아웃 로직 필요 시 수정 */ }
+    function logout() {
+        // [수정] 메인 화면(root)으로 이동
+        location.href = contextPath + '/';
+    }
 
     // [추가됨] Kit 수정 (간단한 프롬프트 활용)
     function updateKit() {

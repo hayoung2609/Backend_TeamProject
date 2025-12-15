@@ -19,6 +19,21 @@
         VALUES (#{kitId}, #{groupId}, #{artifactId}, #{version})
     </insert>
 
+    <select id="selectKitById" resultType="org.example.mavenguard.vo.KitVO">
+        SELECT
+            kit_id          AS kitId,
+            user_id         AS userId,
+            title,
+            project_version AS projectVersion,
+            category,
+            description,
+            is_public       AS isPublic,
+            created_at      AS createdAt,
+            updated_at      AS updatedAt
+        FROM kits
+        WHERE kit_id = #{kitId}
+    </select>
+
     <select id="selectKitsByUserId"
             resultType="org.example.mavenguard.vo.KitVO">
         SELECT

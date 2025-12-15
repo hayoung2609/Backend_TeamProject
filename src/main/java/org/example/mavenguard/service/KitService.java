@@ -44,6 +44,9 @@ public class KitService {
         return kitMapper.selectKitsByUserId(userId);
     }
 
+    public KitVO getKit(Long kitId) {
+        return kitMapper.selectKitById(kitId);
+    }
     /**
      * ================================
      * 3️⃣ 내 Kit인지 검증 (보안 핵심)

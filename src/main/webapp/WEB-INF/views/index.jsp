@@ -58,19 +58,18 @@
         .result-item:last-child { border-bottom: none; }
         .workspace-title { font-family: var(--font-code); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-sub); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end; }
 
-        /* --- [변경 1] Grid Layout 스타일 적용 --- */
+        /* Grid Layout */
         #tagContainer {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* 반응형 그리드 */
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 16px;
-            padding-bottom: 100px; /* 플로팅 바 가리지 않게 여백 추가 */
+            padding-bottom: 100px;
         }
 
         .dep-item {
             background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;
-            /* margin-bottom 삭제 (grid gap 사용) */
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; /* 세로 배치로 변경하여 공간 효율화 */
+            display: flex; flex-direction: column;
             gap: 12px;
             position: relative; overflow: hidden;
         }
@@ -85,7 +84,7 @@
         .ver-badge { font-family: var(--font-code); background: #f1f5f9; color: var(--text-main); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
         .ver-badge:hover { border-color: var(--primary-accent); color: var(--primary-accent); background: white; }
 
-        /* --- [변경 2] 플로팅 액션 바 스타일 --- */
+        /* Floating Action Bar */
         .floating-action-bar {
             position: fixed;
             bottom: 30px;
@@ -111,7 +110,6 @@
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             border: none; padding: 12px 28px; font-weight: 700; font-size: 1rem; border-radius: 99px;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.3s;
-            /* width 100% 제거 */
             color: white;
             white-space: nowrap;
         }
@@ -132,7 +130,7 @@
 
 <nav class="navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand brand-logo" href="index.jsp">
+        <a class="navbar-brand brand-logo" href="${pageContext.request.contextPath}/">
             <span class="fa-stack" style="font-size: 0.8em;">
               <i class="fas fa-circle fa-stack-2x" style="color: rgba(59, 130, 246, 0.1);"></i>
               <i class="fas fa-shield-halved fa-stack-1x text-primary"></i>
@@ -141,7 +139,7 @@
         </a>
         <div class="d-flex align-items-center gap-3">
             <c:if test="${empty sessionScope.loginUser}">
-                <a href="login.jsp" class="btn btn-dark rounded-pill px-4 fw-medium text-sm">Sign In</a>
+                <a href="${pageContext.request.contextPath}/login" class="btn btn-dark rounded-pill px-4 fw-medium text-sm">Sign In</a>
             </c:if>
             <c:if test="${not empty sessionScope.loginUser}">
                 <div class="dropdown">
@@ -149,7 +147,7 @@
                         <i class="fas fa-user-astronaut me-2 text-secondary"></i>${sessionScope.loginUser.name}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4 p-2">
-                        <li><a class="dropdown-item rounded-3" href="/kits/my"><i class="fas fa-box-archive me-2 text-primary"></i>Saved Kits</a></li>
+                        <li><a class="dropdown-item rounded-3" href="${pageContext.request.contextPath}/kits/my"><i class="fas fa-box-archive me-2 text-primary"></i>Saved Kits</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item rounded-3 text-danger" onclick="logout()"><i class="fas fa-power-off me-2"></i>Log Out</button></li>
                     </ul>
@@ -247,71 +245,71 @@
                 </button>
             </div>
         </div>
-</div>
+    </div>
 
-<div class="modal fade" id="vulnModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger d-flex align-items-center">
-                    <i class="fas fa-triangle-exclamation me-2"></i>Security Alert
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle">
-                        <i class="fas fa-bug fa-xl"></i>
+    <div class="modal fade" id="vulnModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger d-flex align-items-center">
+                        <i class="fas fa-triangle-exclamation me-2"></i>Security Alert
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle">
+                            <i class="fas fa-bug fa-xl"></i>
+                        </div>
+                        <div>
+                            <h6 id="modalTitle" class="fw-bold mb-0 font-code text-dark" style="font-size: 1.1rem;"></h6>
+                            <span class="badge bg-danger mt-1">Vulnerable</span>
+                        </div>
                     </div>
-                    <div>
-                        <h6 id="modalTitle" class="fw-bold mb-0 font-code text-dark" style="font-size: 1.1rem;"></h6>
-                        <span class="badge bg-danger mt-1">Vulnerable</span>
+
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div id="modalDetail" class="small text-secondary" style="line-height: 1.6;"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-success-subtle rounded-3 border border-success-subtle">
+                        <div class="d-flex align-items-center gap-2 text-success fw-bold">
+                            <i class="fas fa-shield-virus"></i> Recommendation
+                        </div>
+                        <span id="modalFix" class="font-code bg-white px-3 py-1 rounded border border-success-subtle text-dark fw-bold"></span>
                     </div>
                 </div>
-
-                <div class="bg-light p-3 rounded-3 border mb-3">
-                    <div id="modalDetail" class="small text-secondary" style="line-height: 1.6;"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Close</button>
+                    <button id="btnFix" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fas fa-wrench me-2"></i>Apply Fix
+                    </button>
                 </div>
-
-                <div class="d-flex justify-content-between align-items-center p-3 bg-success-subtle rounded-3 border border-success-subtle">
-                    <div class="d-flex align-items-center gap-2 text-success fw-bold">
-                        <i class="fas fa-shield-virus"></i> Recommendation
-                    </div>
-                    <span id="modalFix" class="font-code bg-white px-3 py-1 rounded border border-success-subtle text-dark fw-bold"></span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Close</button>
-                <button id="btnFix" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
-                    <i class="fas fa-wrench me-2"></i>Apply Fix
-                </button>
             </div>
         </div>
     </div>
-</div>
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const contextPath = "${pageContext.request.contextPath}";
-    let items = [];
-    const vulnModal = new bootstrap.Modal(document.getElementById('vulnModal'));
-    let selectedIndex = -1;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const contextPath = "${pageContext.request.contextPath}";
+        let items = [];
+        const vulnModal = new bootstrap.Modal(document.getElementById('vulnModal'));
+        let selectedIndex = -1;
 
-    function formatDate(timestamp) {
-        if(!timestamp) return '';
-        const date = new Date(timestamp);
-        return date.toLocaleDateString();
-    }
+        function formatDate(timestamp) {
+            if(!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString();
+        }
 
-    function showToast(msg, type='success') {
-        const container = document.getElementById('toastContainer');
-        const iconClass = type === 'success' ? 'fa-circle-check text-success' :
-            type === 'trash' ? 'fa-trash-can text-secondary' : 'fa-circle-exclamation text-danger';
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toastContainer');
+            const iconClass = type === 'success' ? 'fa-circle-check text-success' :
+                type === 'trash' ? 'fa-trash-can text-secondary' : 'fa-circle-exclamation text-danger';
 
-        const el = document.createElement('div');
-        el.className = 'toast show align-items-center border-0 shadow-lg rounded-4 mb-2 animate__animated animate__fadeInRight';
-        el.innerHTML = `
+            const el = document.createElement('div');
+            el.className = 'toast show align-items-center border-0 shadow-lg rounded-4 mb-2 animate__animated animate__fadeInRight';
+            el.innerHTML = `
             <div class="d-flex py-1 px-2">
                 <div class="toast-body d-flex align-items-center gap-2">
                     <i class="fas \${iconClass} fa-lg"></i>
@@ -319,44 +317,44 @@
                 </div>
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>`;
-        container.appendChild(el);
-        setTimeout(() => { el.remove(); }, 3500);
-    }
+            container.appendChild(el);
+            setTimeout(() => { el.remove(); }, 3500);
+        }
 
-    // --- Search Logic ---
-    let timer;
-    const searchInput = document.getElementById('keyword');
-    const resDiv = document.getElementById('searchResult');
+        // --- Search Logic ---
+        let timer;
+        const searchInput = document.getElementById('keyword');
+        const resDiv = document.getElementById('searchResult');
 
-    searchInput.addEventListener('input', function() {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            const q = this.value.trim();
-            if(!q) { resDiv.style.display='none'; return; }
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                const q = this.value.trim();
+                if(!q) { resDiv.style.display='none'; return; }
 
-            fetch(contextPath + '/api/libraries/search?q=' + encodeURIComponent(q))
-                .then(res => res.json())
-                .then(renderSearchResults)
-                .catch(err => console.error(err));
-        }, 300);
-    });
+                fetch(contextPath + '/api/libraries/search?q=' + encodeURIComponent(q))
+                    .then(res => res.json())
+                    .then(renderSearchResults)
+                    .catch(err => console.error(err));
+            }, 300);
+        });
 
-    document.addEventListener('click', (e) => {
-        if (!searchInput.contains(e.target) && !resDiv.contains(e.target)) resDiv.style.display = 'none';
-    });
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !resDiv.contains(e.target)) resDiv.style.display = 'none';
+        });
 
-    function renderSearchResults(data) {
-        resDiv.innerHTML = '';
-        if(!data || data.length === 0) return;
-        resDiv.style.display = 'block';
+        function renderSearchResults(data) {
+            resDiv.innerHTML = '';
+            if(!data || data.length === 0) return;
+            resDiv.style.display = 'block';
 
-        data.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'result-item';
-            const descHtml = item.description ?
-                `<span class="badge bg-secondary bg-opacity-10 text-secondary border ms-2" style="font-size:0.7em">\${item.description}</span>` : '';
+            data.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'result-item';
+                const descHtml = item.description ?
+                    `<span class="badge bg-secondary bg-opacity-10 text-secondary border ms-2" style="font-size:0.7em">\${item.description}</span>` : '';
 
-            el.innerHTML = `
+                el.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center">
                     <div style="flex: 1; min-width: 0;">
                         <div class="d-flex align-items-center flex-wrap gap-1">
@@ -375,83 +373,81 @@
                         <i class="fas fa-plus-circle text-primary opacity-50 fa-lg"></i>
                     </div>
                 </div>`;
-            el.onclick = () => {
-                addItem(item.groupId, item.artifactId, item.latestVersion);
-                resDiv.style.display = 'none';
-                searchInput.value = '';
-            };
-            resDiv.appendChild(el);
-        });
-    }
+                el.onclick = () => {
+                    addItem(item.groupId, item.artifactId, item.latestVersion);
+                    resDiv.style.display = 'none';
+                    searchInput.value = '';
+                };
+                resDiv.appendChild(el);
+            });
+        }
 
-    function parsePom() {
-        const xml = document.getElementById('pomArea').value;
-        if(!xml.trim()) return showToast("Please paste XML content.", "error");
+        function parsePom() {
+            const xml = document.getElementById('pomArea').value;
+            if(!xml.trim()) return showToast("Please paste XML content.", "error");
 
-        fetch(contextPath + '/api/libraries/parse', {
-            method: 'POST', headers: {'Content-Type': 'text/plain'}, body: xml
-        })
-            .then(res => res.json())
-            .then(data => {
-                let count = 0;
-                data.forEach(item => {
-                    if(!items.some(i => i.g === item.groupId && i.a === item.artifactId)) {
-                        items.push({ g: item.groupId, a: item.artifactId, v: item.latestVersion, status: 'unknown' });
-                        count++;
-                    }
-                });
-                render();
-                document.getElementById('pomArea').value = '';
-                showToast(`Analyzed \${count} dependencies.`);
-                document.getElementById('search-tab').click();
+            fetch(contextPath + '/api/libraries/parse', {
+                method: 'POST', headers: {'Content-Type': 'text/plain'}, body: xml
             })
-            .catch(() => showToast("Parsing failed.", "error"));
-    }
-
-    function addItem(g, a, v) {
-        if(items.some(i => i.g === g && i.a === a)) {
-            showToast("Already exists in list.", "error");
-            return;
-        }
-        items.push({ g: g, a: a, v: v, status: 'unknown' });
-        render();
-        showToast("Library added. Don't forget to Audit!");
-    }
-
-    function render() {
-        const container = document.getElementById('tagContainer');
-        const workspace = document.getElementById('workspace');
-
-        // 아이템 개수 업데이트 (플로팅 바용)
-        document.getElementById('itemCountBadge').innerText = items.length + ' items';
-
-        if(items.length > 0) {
-            workspace.style.display = 'block';
-            if(container.innerHTML === '') workspace.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            workspace.style.display = 'none';
-            return;
+                .then(res => res.json())
+                .then(data => {
+                    let count = 0;
+                    data.forEach(item => {
+                        if(!items.some(i => i.g === item.groupId && i.a === item.artifactId)) {
+                            items.push({ g: item.groupId, a: item.artifactId, v: item.latestVersion, status: 'unknown' });
+                            count++;
+                        }
+                    });
+                    render();
+                    document.getElementById('pomArea').value = '';
+                    showToast(`Analyzed \${count} dependencies.`);
+                    document.getElementById('search-tab').click();
+                })
+                .catch(() => showToast("Parsing failed.", "error"));
         }
 
-        container.innerHTML = '';
-        items.forEach((item, idx) => {
-            let statusBadge = '<span class="badge bg-light text-secondary border fw-medium"><i class="fas fa-hourglass-half me-1"></i>Pending</span>';
-            let rowClass = '';
-            let actionBtn = '';
+        function addItem(g, a, v) {
+            if(items.some(i => i.g === g && i.a === a)) {
+                showToast("Already exists in list.", "error");
+                return;
+            }
+            items.push({ g: g, a: a, v: v, status: 'unknown' });
+            render();
+            showToast("Library added. Don't forget to Audit!");
+        }
 
-            if(item.status === 'safe') {
-                statusBadge = '<span class="badge bg-success-subtle text-success border border-success-subtle fw-bold"><i class="fas fa-shield-check me-1"></i>Secure</span>';
-                rowClass = 'safe';
-            } else if(item.status === 'danger') {
-                statusBadge = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold"><i class="fas fa-bug me-1"></i>Vuln Found</span>';
-                rowClass = 'danger';
-                actionBtn = `<button class="btn btn-sm btn-outline-danger w-100 fw-bold rounded-pill" onclick="openModal(\${idx})">Fix It</button>`;
+        function render() {
+            const container = document.getElementById('tagContainer');
+            const workspace = document.getElementById('workspace');
+
+            document.getElementById('itemCountBadge').innerText = items.length + ' items';
+
+            if(items.length > 0) {
+                workspace.style.display = 'block';
+                if(container.innerHTML === '') workspace.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                workspace.style.display = 'none';
+                return;
             }
 
-            const el = document.createElement('div');
-            el.className = `dep-item \${rowClass}`;
-            // [변경 4] Grid에 맞게 내부 구조 변경: 세로 배치
-            el.innerHTML = `
+            container.innerHTML = '';
+            items.forEach((item, idx) => {
+                let statusBadge = '<span class="badge bg-light text-secondary border fw-medium"><i class="fas fa-hourglass-half me-1"></i>Pending</span>';
+                let rowClass = '';
+                let actionBtn = '';
+
+                if(item.status === 'safe') {
+                    statusBadge = '<span class="badge bg-success-subtle text-success border border-success-subtle fw-bold"><i class="fas fa-shield-check me-1"></i>Secure</span>';
+                    rowClass = 'safe';
+                } else if(item.status === 'danger') {
+                    statusBadge = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold"><i class="fas fa-bug me-1"></i>Vuln Found</span>';
+                    rowClass = 'danger';
+                    actionBtn = `<button class="btn btn-sm btn-outline-danger w-100 fw-bold rounded-pill" onclick="openModal(\${idx})">Fix It</button>`;
+                }
+
+                const el = document.createElement('div');
+                el.className = `dep-item \${rowClass}`;
+                el.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start w-100">
                     <div class="d-flex flex-column" style="overflow:hidden;">
                         <span class="lib-name text-truncate">\${item.a}</span>
@@ -469,87 +465,144 @@
 
                 \${actionBtn ? '<div class="mt-2 w-100">' + actionBtn + '</div>' : ''}
             `;
-            container.appendChild(el);
-        });
-    }
-
-    function removeItem(idx) { items.splice(idx, 1); render(); }
-
-    function editVersion(idx) {
-        const newVer = prompt("Enter manual version:", items[idx].v);
-        if(newVer && newVer.trim() && newVer !== items[idx].v) {
-            items[idx].v = newVer.trim(); items[idx].status = 'unknown'; render();
+                container.appendChild(el);
+            });
         }
-    }
 
-    async function runSecurityCheck() {
-        const btn = document.getElementById('btnCheck');
-        const orgHtml = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Scanning...';
-        btn.disabled = true;
+        function removeItem(idx) { items.splice(idx, 1); render(); }
 
-        await new Promise(r => setTimeout(r, 600));
-
-        for(let i=0; i<items.length; i++) {
-            try {
-                const res = await fetch(contextPath + '/api/libraries/check', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({groupId: items[i].g, artifactId: items[i].a, version: items[i].v})
-                });
-
-                if(res.ok) {
-                    const data = await res.json();
-                    items[i].status = data.safe ? 'safe' : 'danger';
-                    if(!data.safe) {
-                        items[i].detail = data.detail;
-                        items[i].fix = data.fixedVersion;
-                    }
-                }
-            } catch(e) { console.error(e); }
+        function editVersion(idx) {
+            const newVer = prompt("Enter manual version:", items[idx].v);
+            if(newVer && newVer.trim() && newVer !== items[idx].v) {
+                items[idx].v = newVer.trim(); items[idx].status = 'unknown'; render();
+            }
         }
-        render();
-        btn.innerHTML = orgHtml;
-        btn.disabled = false;
-        showToast("Security audit completed.");
-    }
 
-    function openModal(idx) {
-        selectedIndex = idx;
-        const item = items[idx];
-        document.getElementById('modalTitle').innerText = `\${item.a} (\${item.v})`;
-        document.getElementById('modalDetail').innerText = item.detail || "No detailed CVE info available.";
-
-        const fixVer = item.fix;
-        const btn = document.getElementById('btnFix');
-        const fixSpan = document.getElementById('modalFix');
-
-        if(fixVer && fixVer !== '정보 없음' && fixVer !== 'Unknown') {
-            fixSpan.innerText = fixVer;
-            btn.disabled = false;
-            btn.onclick = () => {
-                items[idx].v = fixVer;
-                items[idx].status = 'safe';
-                items[idx].detail = null;
-                render();
-                vulnModal.hide();
-                showToast("Updated to safe version (" + fixVer + ").");
-            };
-        } else {
-            fixSpan.innerText = "Manual fix required";
+        async function runSecurityCheck() {
+            const btn = document.getElementById('btnCheck');
+            const orgHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Scanning...';
             btn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 600));
+
+            for(let i=0; i<items.length; i++) {
+                try {
+                    const res = await fetch(contextPath + '/api/libraries/check', {
+                        method:'POST', headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({groupId: items[i].g, artifactId: items[i].a, version: items[i].v})
+                    });
+
+                    if(res.ok) {
+                        const data = await res.json();
+                        items[i].status = data.safe ? 'safe' : 'danger';
+                        if(!data.safe) {
+                            items[i].detail = data.detail;
+                            items[i].fix = data.fixedVersion;
+                        }
+                    }
+                } catch(e) { console.error(e); }
+            }
+            render();
+            btn.innerHTML = orgHtml;
+            btn.disabled = false;
+            showToast("Security audit completed.");
         }
-        vulnModal.show();
-    }
 
-    function copyXml() {
-        if(items.length===0) return;
-        let xml = "<dependencies>\n";
-        items.forEach(i => xml += `    <dependency>\n        <groupId>\${i.g}</groupId>\n        <artifactId>\${i.a}</artifactId>\n        <version>\${i.v}</version>\n    </dependency>\n`);
-        xml += "</dependencies>";
-        navigator.clipboard.writeText(xml).then(()=>showToast("XML copied to clipboard."));
-    }
+        function openModal(idx) {
+            selectedIndex = idx;
+            const item = items[idx];
+            document.getElementById('modalTitle').innerText = `\${item.a} (\${item.v})`;
+            document.getElementById('modalDetail').innerText = item.detail || "No detailed CVE info available.";
 
-    function logout() { location.reload(); }
-</script>
+            const fixVer = item.fix;
+            const btn = document.getElementById('btnFix');
+            const fixSpan = document.getElementById('modalFix');
+
+            if(fixVer && fixVer !== '정보 없음' && fixVer !== 'Unknown') {
+                fixSpan.innerText = fixVer;
+                btn.disabled = false;
+                btn.onclick = () => {
+                    items[idx].v = fixVer;
+                    items[idx].status = 'safe';
+                    items[idx].detail = null;
+                    render();
+                    vulnModal.hide();
+                    showToast("Updated to safe version (" + fixVer + ").");
+                };
+            } else {
+                fixSpan.innerText = "Manual fix required";
+                btn.disabled = true;
+            }
+            vulnModal.show();
+        }
+
+        function saveKit() {
+            if ("${sessionScope.loginUser}" === "") {
+                alert("로그인이 필요한 서비스입니다.");
+                // [수정] 자바스크립트 이동 경로: contextPath 사용
+                location.href = contextPath + "/login";
+                return;
+            }
+
+            if (items.length === 0) {
+                showToast("저장할 라이브러리가 없습니다.", "error");
+                return;
+            }
+
+            const title = prompt("Kit 제목을 입력하세요:", "My Awesome Stack");
+            if (title === null) return;
+
+            const desc = prompt("설명을 입력하세요:", "프로젝트 설명을 입력하세요.");
+            if (desc === null) return;
+
+            const kitItems = items.map(i => ({
+                groupId: i.g,
+                artifactId: i.a,
+                version: i.v
+            }));
+
+            fetch(contextPath + '/kits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: title,
+                    description: desc,
+                    projectVersion: "1.0.0",
+                    category: "General",
+                    isPublic: true,
+                    itemList: kitItems
+                })
+            })
+                .then(res => res.text())
+                .then(msg => {
+                    if (msg === 'OK') {
+                        alert("Kit이 저장되었습니다! \nMy Kits 페이지에서 확인하세요.");
+                        items = [];
+                        render();
+                    } else if (msg === 'LOGIN_REQUIRED') {
+                        alert("로그인이 필요합니다.");
+                        // [수정] contextPath 사용
+                        location.href = contextPath + "/login";
+                    } else {
+                        alert("저장 실패: " + msg);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("서버 오류 발생");
+                });
+        }
+
+        function copyXml() {
+            if(items.length===0) return;
+            let xml = "<dependencies>\n";
+            items.forEach(i => xml += `    <dependency>\n        <groupId>\${i.g}</groupId>\n        <artifactId>\${i.a}</artifactId>\n        <version>\${i.v}</version>\n    </dependency>\n`);
+            xml += "</dependencies>";
+            navigator.clipboard.writeText(xml).then(()=>showToast("XML copied to clipboard."));
+        }
+
+        function logout() { location.reload(); }
+    </script>
 </body>
 </html>
