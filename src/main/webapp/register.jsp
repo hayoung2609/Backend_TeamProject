@@ -28,6 +28,11 @@
                 <input type="email" id="email" class="form-control">
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">닉네임</label>
+                <input type="text" id="nickname" class="form-control" placeholder="사용할 이름을 입력하세요">
+            </div>
+
             <div class="mb-4">
                 <label class="form-label">비밀번호</label>
                 <input type="password" id="password" class="form-control">
