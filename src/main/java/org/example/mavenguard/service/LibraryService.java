@@ -25,9 +25,11 @@ public class LibraryService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // 1. Maven Central 검색 (날짜 정보 추가)
+    /**
+     * 1. Maven Central 검색
+     * - 검색은 빨라야 하므로 보안 진단(외부 API 호출)은 제외하고 메타데이터만 구성합니다.
+     */
     public List<LibraryVO> searchLibraries(String keyword) {
-        // core='gav' 옵션을 추가하면 더 정확한 그룹/아티팩트 검색이 가능하지만, 일단 기본 검색 사용
         String url = "https://search.maven.org/solrsearch/select?q=" + keyword + "&rows=20&wt=json";
         List<LibraryVO> resultList = new ArrayList<>();
 
@@ -38,12 +40,19 @@ public class LibraryService {
 
             for (JsonNode doc : docs) {
                 LibraryVO vo = new LibraryVO();
-                vo.setGroupId(doc.path("g").asText());
-                vo.setArtifactId(doc.path("a").asText());
-                vo.setLatestVersion(doc.path("latestVersion").asText());
+                String g = doc.path("g").asText();
+                String a = doc.path("a").asText();
+                String v = doc.path("latestVersion").asText();
+                String p = doc.path("p").asText(); // packaging
 
-                // [추가] 마지막 업데이트 타임스탬프 (유지보수 여부 판단용)
+                vo.setGroupId(g);
+                vo.setArtifactId(a);
+                vo.setLatestVersion(v);
                 vo.setLastUpdated(doc.path("timestamp").asLong());
+                vo.setPackaging(p);
+
+                // 사용자가 보기 편한 설명 포맷 생성
+                vo.setDescription(String.format("[%s] %s:%s", p, g, a));
 
                 resultList.add(vo);
             }
@@ -53,15 +62,60 @@ public class LibraryService {
         return resultList;
     }
 
-    // 2. 보안 취약점 진단 (OSV API 고도화)
+    /**
+     * 2. POM 파일 진단 (파싱 + 일괄 보안 검사)
+     * - 사용자가 붙여넣은 XML 내용을 파싱 후, 각 라이브러리마다 보안 검사를 수행합니다.
+     */
+    public List<LibraryVO> diagnosePom(String xmlText) {
+        // 1. 파싱
+        List<LibraryVO> dependencies = parsePomXml(xmlText);
+
+        // 2. 보안 진단 (사용자가 버전을 수정할 수 있으므로, 입력된 버전 그대로 진단)
+        for (LibraryVO vo : dependencies) {
+            // 버전이 변수(${...})가 아니고 실제 값일 때만 진단
+            if (vo.getLatestVersion() != null && !vo.getLatestVersion().startsWith("${")) {
+                fillSecurityData(vo);
+            } else {
+                vo.setSafe(true);
+                vo.setVulnerabilityMsg("버전 정보 확인 불가 (변수 사용 등)");
+            }
+        }
+        return dependencies;
+    }
+
+    /**
+     * 3. 단건 보안 진단 (사용자가 버전을 수정했을 때 호출됨)
+     */
     public Map<String, Object> checkVulnerability(String groupId, String artifactId, String version) {
-        String url = "https://api.osv.dev/v1/query";
+        LibraryVO vo = new LibraryVO();
+        vo.setGroupId(groupId);
+        vo.setArtifactId(artifactId);
+        vo.setLatestVersion(version);
+
+        // 공통 진단 로직 호출
+        fillSecurityData(vo);
+
+        // Controller 반환용 Map 구성
         Map<String, Object> result = new HashMap<>();
+        result.put("safe", vo.isSafe());
+        result.put("count", vo.getVulnerabilityCount());
+        result.put("detail", vo.getVulnerabilityMsg());
+        result.put("fixedVersion", vo.getFixedVersion());
+        result.put("recommendation", vo.getRecommendation());
+
+        return result;
+    }
+
+    /**
+     * [핵심] OSV API를 이용해 데이터를 채우는 공통 메서드
+     */
+    private void fillSecurityData(LibraryVO vo) {
+        String url = "https://api.osv.dev/v1/query";
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("version", version);
+        requestBody.put("version", vo.getLatestVersion()); // 사용자가 입력/수정한 버전 기준
         Map<String, String> packageInfo = new HashMap<>();
-        packageInfo.put("name", groupId + ":" + artifactId);
+        packageInfo.put("name", vo.getGroupId() + ":" + vo.getArtifactId());
         packageInfo.put("ecosystem", "Maven");
         requestBody.put("package", packageInfo);
 
@@ -70,45 +124,47 @@ public class LibraryService {
             JsonNode root = objectMapper.readTree(response);
 
             if (root.has("vulns")) {
-                result.put("safe", false);
+                vo.setSafe(false);
                 JsonNode vulns = root.path("vulns");
-                result.put("count", vulns.size());
+                vo.setVulnerabilityCount(vulns.size());
 
-                // 첫 번째 취약점의 상세 정보 추출
-                JsonNode firstVuln = vulns.get(0);
-                result.put("detail", firstVuln.path("summary").asText());
+                String summary = vulns.get(0).path("summary").asText();
+                if (summary == null || summary.isEmpty()) summary = "취약점 상세 정보 없음";
+                vo.setVulnerabilityMsg(summary);
 
-                // [추가] 해결된 버전(Fixed Version) 찾기
-                String fixedVersion = "정보 없음";
-                try {
-                    // affected -> ranges -> events -> fixed 구조 탐색
-                    JsonNode affected = firstVuln.path("affected").get(0);
-                    JsonNode ranges = affected.path("ranges").get(0);
-                    for (JsonNode event : ranges.path("events")) {
-                        if (event.has("fixed")) {
-                            fixedVersion = event.path("fixed").asText();
-                            break;
-                        }
-                    }
-                } catch (Exception ignore) {}
+                // 해결된 버전(Fixed Version) 찾기
+                String fixedVersion = findFixedVersion(vulns.get(0));
+                vo.setFixedVersion(fixedVersion);
 
-                result.put("fixedVersion", fixedVersion);
-                result.put("recommendation", fixedVersion.equals("정보 없음") ?
+                vo.setRecommendation(fixedVersion.equals("정보 없음") ?
                         "최신 버전으로 업데이트를 권장합니다." :
                         fixedVersion + " 버전 이상으로 업데이트하세요.");
-
             } else {
-                result.put("safe", true);
-                result.put("message", "발견된 취약점이 없습니다.");
+                vo.setSafe(true);
+                vo.setVulnerabilityCount(0);
+                vo.setVulnerabilityMsg("발견된 취약점이 없습니다.");
+                vo.setRecommendation("현재 버전을 사용해도 좋습니다.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            result.put("error", "진단 중 오류 발생");
+            vo.setSafe(false);
+            vo.setVulnerabilityMsg("진단 서버 연결 실패");
         }
-        return result;
     }
 
-    // 3. POM 파싱 (기존 유지)
+    private String findFixedVersion(JsonNode vulnNode) {
+        try {
+            JsonNode affected = vulnNode.path("affected").get(0);
+            JsonNode ranges = affected.path("ranges").get(0);
+            for (JsonNode event : ranges.path("events")) {
+                if (event.has("fixed")) {
+                    return event.path("fixed").asText();
+                }
+            }
+        } catch (Exception ignore) {}
+        return "정보 없음";
+    }
+
+    // 기존 POM 파싱 로직 (그대로 유지)
     public List<LibraryVO> parsePomXml(String xmlText) {
         List<LibraryVO> list = new ArrayList<>();
         try {
@@ -137,8 +193,12 @@ public class LibraryService {
     }
 
     private String getTagValue(String tag, Element element) {
-        NodeList nodeList = element.getElementsByTagName(tag).item(0).getChildNodes();
-        Node node = (Node) nodeList.item(0);
-        return node != null ? node.getNodeValue() : "";
+        try {
+            NodeList nodeList = element.getElementsByTagName(tag);
+            if (nodeList.getLength() > 0) {
+                return nodeList.item(0).getTextContent();
+            }
+        } catch (Exception e) { return ""; }
+        return "";
     }
 }
