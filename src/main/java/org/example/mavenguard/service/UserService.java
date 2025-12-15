@@ -2,10 +2,9 @@ package org.example.mavenguard.service;
 
 import org.example.mavenguard.mapper.UserMapper;
 import org.example.mavenguard.vo.UserVO;
+import org.mindrot.jbcrypt.BCrypt; // Import 추가
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.security.MessageDigest;
 
 @Service
 public class UserService {
@@ -15,7 +14,10 @@ public class UserService {
 
     // 회원가입
     public void register(UserVO user) {
-        user.setPassword(sha256(user.getPassword()));
+        // BCrypt로 비밀번호 암호화 (Salt 자동 생성)
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        user.setPassword(hashedPassword);
+
         userMapper.insertUser(user);
     }
 
@@ -24,24 +26,11 @@ public class UserService {
         UserVO user = userMapper.selectByEmail(email);
         if (user == null) return null;
 
-        String encrypted = sha256(password);
-        if (!encrypted.equals(user.getPassword())) return null;
-
-        return user;
-    }
-
-    // SHA-256 암호화
-    private String sha256(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(input.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        // BCrypt 비밀번호 검증 (입력받은 비번 vs DB 암호화된 비번)
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            return null; // 비번 불일치
         }
+
+        return user; // 로그인 성공
     }
 }

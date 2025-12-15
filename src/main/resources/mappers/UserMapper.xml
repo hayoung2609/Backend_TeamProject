@@ -5,16 +5,14 @@
 
 <mapper namespace="org.example.mavenguard.mapper.UserMapper">
 
-    <!-- 회원가입 -->
     <insert id="insertUser"
             parameterType="org.example.mavenguard.vo.UserVO"
             useGeneratedKeys="true"
             keyProperty="userId">
-        INSERT INTO kit_user (email, password)
-        VALUES (#{email}, #{password})
+        INSERT INTO kit_user (email, password, nickname, role)
+        VALUES (#{email}, #{password}, #{nickname}, 'ROLE_USER')
     </insert>
 
-    <!-- 로그인 -->
     <select id="selectByEmail"
             parameterType="string"
             resultType="org.example.mavenguard.vo.UserVO">
@@ -22,6 +20,8 @@
             user_id   AS userId,
             email,
             password,
+            nickname,
+            role,
             created_at AS createdAt
         FROM kit_user
         WHERE email = #{email}

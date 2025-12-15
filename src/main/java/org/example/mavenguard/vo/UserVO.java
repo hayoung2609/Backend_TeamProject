@@ -8,5 +8,7 @@ public class UserVO {
     private Long userId;
     private String email;
     private String password;
+    private String nickname;
+    private String role;
     private Date createdAt;
 }
