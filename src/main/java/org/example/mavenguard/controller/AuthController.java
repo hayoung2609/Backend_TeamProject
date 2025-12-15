@@ -17,12 +17,30 @@ public class AuthController {
     private UserService userService;
 
     // 회원가입
+    // AuthController.java
+
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody UserVO user) {
-        userService.register(user);
-
         Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
+
+        // [가이드 준수] 백엔드 유효성 검증 (Validation)
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty() ||
+                user.getNickname() == null || user.getNickname().trim().isEmpty() ||
+                user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+
+            result.put("success", false);
+            result.put("message", "모든 필드(이메일, 닉네임, 비밀번호)를 입력해야 합니다.");
+            return result;
+        }
+
+        try {
+            userService.register(user);
+            result.put("success", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "회원가입 중 오류가 발생했습니다. (중복된 이메일 등)");
+        }
         return result;
     }
 
