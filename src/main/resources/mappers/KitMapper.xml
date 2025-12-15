@@ -5,47 +5,37 @@
 
 <mapper namespace="org.example.mavenguard.mapper.KitMapper">
 
-    <!-- ============================= -->
-    <!-- 1️⃣ Kit 저장 -->
-    <!-- ============================= -->
-    <!-- useGeneratedKeys="true" : 생성된 kit_id를 KitVO.kitId에 주입 -->
     <insert id="insertKit"
             parameterType="org.example.mavenguard.vo.KitVO"
             useGeneratedKeys="true"
             keyProperty="kitId">
-        INSERT INTO kits (user_id, title, description, is_public)
-        VALUES (#{userId}, #{title}, #{description}, #{isPublic})
+        INSERT INTO kits (user_id, title, project_version, category, description, is_public)
+        VALUES (#{userId}, #{title}, #{projectVersion}, #{category}, #{description}, #{isPublic})
     </insert>
 
-    <!-- ============================= -->
-    <!-- 2️⃣ Kit 아이템 저장 -->
-    <!-- ============================= -->
     <insert id="insertKitItem"
             parameterType="org.example.mavenguard.vo.KitItemVO">
         INSERT INTO kit_items (kit_id, group_id, artifact_id, version)
         VALUES (#{kitId}, #{groupId}, #{artifactId}, #{version})
     </insert>
 
-    <!-- ============================= -->
-    <!-- 3️⃣ 내 Kit 목록 조회 -->
-    <!-- ============================= -->
     <select id="selectKitsByUserId"
             resultType="org.example.mavenguard.vo.KitVO">
         SELECT
-            kit_id   AS kitId,
-            user_id  AS userId,
+            kit_id          AS kitId,
+            user_id         AS userId,
             title,
+            project_version AS projectVersion,
+            category,
             description,
-            is_public AS isPublic,
-            created_at AS createdAt
+            is_public       AS isPublic,
+            created_at      AS createdAt,
+            updated_at      AS updatedAt
         FROM kits
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
     </select>
 
-    <!-- ============================= -->
-    <!-- 4️⃣ 특정 Kit의 아이템 조회 -->
-    <!-- ============================= -->
     <select id="selectItemsByKitId"
             resultType="org.example.mavenguard.vo.KitItemVO">
         SELECT
@@ -59,9 +49,6 @@
         ORDER BY item_id ASC
     </select>
 
-    <!-- ============================= -->
-    <!-- 5️⃣ ⭐ 내 Kit인지 검증 (추가됨) -->
-    <!-- ============================= -->
     <select id="countMyKit" resultType="int">
         SELECT COUNT(*)
         FROM kits
