@@ -30,6 +30,7 @@ public class LibraryService {
      * - 검색은 빨라야 하므로 보안 진단(외부 API 호출)은 제외하고 메타데이터만 구성합니다.
      */
     public List<LibraryVO> searchLibraries(String keyword) {
+        // q=keyword & core=gav (기본)
         String url = "https://search.maven.org/solrsearch/select?q=" + keyword + "&rows=20&wt=json";
         List<LibraryVO> resultList = new ArrayList<>();
 
@@ -43,7 +44,7 @@ public class LibraryService {
                 String g = doc.path("g").asText();
                 String a = doc.path("a").asText();
                 String v = doc.path("latestVersion").asText();
-                String p = doc.path("p").asText(); // packaging
+                String p = doc.path("p").asText(); // packaging (jar, pom, war...)
 
                 vo.setGroupId(g);
                 vo.setArtifactId(a);
@@ -51,8 +52,23 @@ public class LibraryService {
                 vo.setLastUpdated(doc.path("timestamp").asLong());
                 vo.setPackaging(p);
 
-                // 사용자가 보기 편한 설명 포맷 생성
-                vo.setDescription(String.format("[%s] %s:%s", p, g, a));
+                // [수정됨] 태그 정보 파싱 (사용자에게 어떤 라이브러리인지 힌트 제공)
+                List<String> tags = new ArrayList<>();
+                if (doc.has("tags")) {
+                    for (JsonNode tag : doc.path("tags")) {
+                        tags.add(tag.asText());
+                    }
+                }
+
+                // 설명 필드에 패키징과 태그 정보를 조합하여 저장
+                StringBuilder desc = new StringBuilder();
+                desc.append("[").append(p.toUpperCase()).append("] ");
+                if (!tags.isEmpty()) {
+                    desc.append("Tags: ").append(String.join(", ", tags));
+                } else {
+                    desc.append(g);
+                }
+                vo.setDescription(desc.toString());
 
                 resultList.add(vo);
             }
@@ -62,17 +78,9 @@ public class LibraryService {
         return resultList;
     }
 
-    /**
-     * 2. POM 파일 진단 (파싱 + 일괄 보안 검사)
-     * - 사용자가 붙여넣은 XML 내용을 파싱 후, 각 라이브러리마다 보안 검사를 수행합니다.
-     */
     public List<LibraryVO> diagnosePom(String xmlText) {
-        // 1. 파싱
         List<LibraryVO> dependencies = parsePomXml(xmlText);
-
-        // 2. 보안 진단 (사용자가 버전을 수정할 수 있으므로, 입력된 버전 그대로 진단)
         for (LibraryVO vo : dependencies) {
-            // 버전이 변수(${...})가 아니고 실제 값일 때만 진단
             if (vo.getLatestVersion() != null && !vo.getLatestVersion().startsWith("${")) {
                 fillSecurityData(vo);
             } else {
@@ -83,19 +91,14 @@ public class LibraryService {
         return dependencies;
     }
 
-    /**
-     * 3. 단건 보안 진단 (사용자가 버전을 수정했을 때 호출됨)
-     */
     public Map<String, Object> checkVulnerability(String groupId, String artifactId, String version) {
         LibraryVO vo = new LibraryVO();
         vo.setGroupId(groupId);
         vo.setArtifactId(artifactId);
         vo.setLatestVersion(version);
 
-        // 공통 진단 로직 호출
         fillSecurityData(vo);
 
-        // Controller 반환용 Map 구성
         Map<String, Object> result = new HashMap<>();
         result.put("safe", vo.isSafe());
         result.put("count", vo.getVulnerabilityCount());
@@ -106,14 +109,11 @@ public class LibraryService {
         return result;
     }
 
-    /**
-     * [핵심] OSV API를 이용해 데이터를 채우는 공통 메서드
-     */
     private void fillSecurityData(LibraryVO vo) {
         String url = "https://api.osv.dev/v1/query";
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("version", vo.getLatestVersion()); // 사용자가 입력/수정한 버전 기준
+        requestBody.put("version", vo.getLatestVersion());
         Map<String, String> packageInfo = new HashMap<>();
         packageInfo.put("name", vo.getGroupId() + ":" + vo.getArtifactId());
         packageInfo.put("ecosystem", "Maven");
@@ -132,7 +132,6 @@ public class LibraryService {
                 if (summary == null || summary.isEmpty()) summary = "취약점 상세 정보 없음";
                 vo.setVulnerabilityMsg(summary);
 
-                // 해결된 버전(Fixed Version) 찾기
                 String fixedVersion = findFixedVersion(vulns.get(0));
                 vo.setFixedVersion(fixedVersion);
 
@@ -160,18 +159,32 @@ public class LibraryService {
                     return event.path("fixed").asText();
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return "정보 없음";
     }
 
-    // 기존 POM 파싱 로직 (그대로 유지)
     public List<LibraryVO> parsePomXml(String xmlText) {
         List<LibraryVO> list = new ArrayList<>();
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
+            // XML 파싱
             Document doc = builder.parse(new InputSource(new StringReader(xmlText)));
             doc.getDocumentElement().normalize();
+
+            Map<String, String> propertiesMap = new HashMap<>();
+            NodeList propsList = doc.getElementsByTagName("properties");
+            if (propsList.getLength() > 0) {
+                Node propsNode = propsList.item(0);
+                NodeList childNodes = propsNode.getChildNodes();
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node item = childNodes.item(i);
+                    if (item.getNodeType() == Node.ELEMENT_NODE) {
+                        propertiesMap.put(item.getNodeName(), item.getTextContent());
+                    }
+                }
+            }
 
             NodeList nList = doc.getElementsByTagName("dependency");
 
@@ -180,9 +193,17 @@ public class LibraryService {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
                     LibraryVO vo = new LibraryVO();
+
                     vo.setGroupId(getTagValue("groupId", element));
                     vo.setArtifactId(getTagValue("artifactId", element));
-                    vo.setLatestVersion(getTagValue("version", element));
+
+                    // 버전 가져오기
+                    String rawVersion = getTagValue("version", element);
+
+                    // 3. 버전이 ${...} 형태라면 propertiesMap에서 찾아 치환
+                    String resolvedVersion = resolveVersion(rawVersion, propertiesMap);
+
+                    vo.setLatestVersion(resolvedVersion);
                     list.add(vo);
                 }
             }
@@ -192,13 +213,34 @@ public class LibraryService {
         return list;
     }
 
+    /**
+     * ${variable} 형태의 버전을 실제 값으로 변환하는 헬퍼 메서드
+     */
+    private String resolveVersion(String rawVersion, Map<String, String> props) {
+        if (rawVersion == null || rawVersion.isEmpty()) return "Unknown";
+
+        // ${...} 패턴인지 확인
+        if (rawVersion.startsWith("${") && rawVersion.endsWith("}")) {
+            // ${spring.version} -> spring.version 추출
+            String key = rawVersion.substring(2, rawVersion.length() - 1);
+
+            // 맵에 해당 키가 있으면 값 반환, 없으면 원본 그대로 반환
+            return props.getOrDefault(key, rawVersion);
+        }
+
+        // 변수가 아니면 그대로 반환
+        return rawVersion;
+    }
+
     private String getTagValue(String tag, Element element) {
         try {
             NodeList nodeList = element.getElementsByTagName(tag);
             if (nodeList.getLength() > 0) {
                 return nodeList.item(0).getTextContent();
             }
-        } catch (Exception e) { return ""; }
+        } catch (Exception e) {
+            return "";
+        }
         return "";
     }
 }
