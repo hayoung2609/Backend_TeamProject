@@ -61,6 +61,28 @@ public class KitService {
     public List<KitItemVO> getItems(Long kitId) {
         return kitMapper.selectItemsByKitId(kitId);
     }
+    /**
+     * ================================
+     * 5️⃣ Kit 수정
+     * ================================
+     */
+    public void updateKit(KitVO kitVO) {
+        // 내 Kit인지 확인 로직은 Controller 또는 여기서 수행
+        kitMapper.updateKit(kitVO);
+    }
+
+    /**
+     * ================================
+     * 6️⃣ Kit 삭제 (트랜잭션: 아이템 삭제 -> Kit 삭제)
+     * ================================
+     */
+    @Transactional
+    public void deleteKit(Long kitId, Long userId) {
+        // 1. 종속된 아이템 먼저 삭제
+        kitMapper.deleteKitItems(kitId);
+        // 2. 메인 Kit 삭제
+        kitMapper.deleteKit(kitId, userId);
+    }
 }
 
 

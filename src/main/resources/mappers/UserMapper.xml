@@ -27,4 +27,10 @@
         WHERE email = #{email}
     </select>
 
+    <select id="selectAllUsers" resultType="org.example.mavenguard.vo.UserVO">
+        SELECT user_id AS userId, email, nickname, role, created_at AS createdAt
+        FROM kit_user
+        ORDER BY created_at DESC
+    </select>
+
 </mapper>

@@ -56,4 +56,21 @@
           AND user_id = #{userId}
     </select>
 
+    <update id="updateKit" parameterType="org.example.mavenguard.vo.KitVO">
+        UPDATE kits
+        SET title = #{title},
+            description = #{description},
+            is_public = #{isPublic},
+            updated_at = NOW()
+        WHERE kit_id = #{kitId} AND user_id = #{userId}
+    </update>
+
+    <delete id="deleteKit">
+        DELETE FROM kits WHERE kit_id = #{kitId} AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteKitItems">
+        DELETE FROM kit_items WHERE kit_id = #{kitId}
+    </delete>
+
 </mapper>

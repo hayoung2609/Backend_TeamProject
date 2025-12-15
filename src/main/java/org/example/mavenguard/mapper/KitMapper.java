@@ -23,5 +23,12 @@ public interface KitMapper {
     // 5. ⭐ 내 Kit인지 검증 (추가 — 이거 없어서 에러 났던 것)
     int countMyKit(@Param("userId") Long userId,
                    @Param("kitId") Long kitId);
+
+    // 6. Kit 수정
+    void updateKit(KitVO kitVO);
+
+    // 7. Kit 삭제
+    void deleteKit(@Param("kitId") Long kitId, @Param("userId") Long userId);
+    void deleteKitItems(Long kitId);
 }
 

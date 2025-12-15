@@ -2,6 +2,8 @@ package org.example.mavenguard.mapper;
 
 import org.example.mavenguard.vo.UserVO;
 
+import java.util.List;
+
 public interface UserMapper {
 
     // 회원가입
@@ -9,4 +11,7 @@ public interface UserMapper {
 
     // 로그인용 조회
     UserVO selectByEmail(String email);
+
+    List<UserVO> selectAllUsers();
+
 }

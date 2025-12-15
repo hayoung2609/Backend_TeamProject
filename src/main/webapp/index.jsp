@@ -237,11 +237,16 @@
                 </div>
             </div>
 
-            <button id="btnCheck" class="btn-check-main" onclick="runSecurityCheck()">
-                <i class="fas fa-shield-virus me-2"></i>Run Audit
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="saveKit()">
+                    <i class="fas fa-cloud-arrow-up me-2"></i>Save Kit
+                </button>
+
+                <button id="btnCheck" class="btn-check-main" onclick="runSecurityCheck()">
+                    <i class="fas fa-shield-virus me-2"></i>Run Audit
+                </button>
+            </div>
         </div>
-    </div>
 </div>
 
 <div class="modal fade" id="vulnModal" tabindex="-1">

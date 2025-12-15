@@ -6,6 +6,8 @@ import org.mindrot.jbcrypt.BCrypt; // Import 추가
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -32,5 +34,9 @@ public class UserService {
         }
 
         return user; // 로그인 성공
+    }
+
+    List<UserVO> getAllUsers(){
+        return userMapper.selectAllUsers();
     }
 }

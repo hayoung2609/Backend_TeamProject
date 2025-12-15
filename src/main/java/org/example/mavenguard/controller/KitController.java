@@ -92,5 +92,47 @@ public class KitController {
 
         return kit;
     }
+    /**
+     * ================================
+     * 4️⃣ Kit 수정 (AJAX)
+     * ================================
+     */
+    @PutMapping("/{kitId}")
+    @ResponseBody
+    public String updateKit(@PathVariable Long kitId,
+                            @RequestBody KitVO kitVO,
+                            HttpSession session) {
+        UserVO loginUser = (UserVO) session.getAttribute("loginUser");
+        if (loginUser == null) return "LOGIN_REQUIRED";
+
+        // 본인 확인
+        if (!kitService.isMyKit(loginUser.getUserId(), kitId)) {
+            return "PERMISSION_DENIED";
+        }
+
+        kitVO.setKitId(kitId);
+        kitVO.setUserId(loginUser.getUserId());
+        kitService.updateKit(kitVO);
+        return "OK";
+    }
+
+    /**
+     * ================================
+     * 5️⃣ Kit 삭제 (AJAX)
+     * ================================
+     */
+    @DeleteMapping("/{kitId}")
+    @ResponseBody
+    public String deleteKit(@PathVariable Long kitId, HttpSession session) {
+        UserVO loginUser = (UserVO) session.getAttribute("loginUser");
+        if (loginUser == null) return "LOGIN_REQUIRED";
+
+        if (!kitService.isMyKit(loginUser.getUserId(), kitId)) {
+            return "PERMISSION_DENIED";
+        }
+
+        kitService.deleteKit(kitId, loginUser.getUserId());
+        return "OK";
+    }
 }
 
