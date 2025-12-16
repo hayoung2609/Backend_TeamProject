@@ -88,4 +88,19 @@
         DELETE FROM kit_items WHERE kit_id = #{kitId}
     </delete>
 
+    <select id="selectAllKitsAdmin" resultType="org.example.mavenguard.vo.KitVO">
+        SELECT
+            k.kit_id          AS kitId,
+            k.user_id         AS userId,
+            u.nickname        AS ownerName, k.title,
+            k.project_version AS projectVersion,
+            k.created_at      AS createdAt
+        FROM kits k
+                 JOIN kit_user u ON k.user_id = u.user_id
+        ORDER BY k.created_at DESC
+    </select>
+
+    <delete id="deleteKitByAdmin">
+        DELETE FROM kits WHERE kit_id = #{kitId}
+    </delete>
 </mapper>

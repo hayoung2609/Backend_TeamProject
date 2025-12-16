@@ -142,15 +142,18 @@
                 <a href="${pageContext.request.contextPath}/login" class="btn btn-dark rounded-pill px-4 fw-medium text-sm">Sign In</a>
             </c:if>
             <c:if test="${not empty sessionScope.loginUser}">
+
+                <c:if test="${sessionScope.loginUser.role == 'ROLE_ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn btn-danger rounded-pill border fw-bold text-white me-2 shadow-sm">
+                        <i class="fas fa-user-shield me-1"></i>Admin
+                    </a>
+                </c:if>
+
+                <a class="btn btn-light rounded-pill border fw-medium text-secondary me-2" href="${pageContext.request.contextPath}/kits/my">
+                    <i class="fas fa-box-archive me-2 text-primary"></i>My Kit
+                </a>
+
                 <div class="dropdown">
-                    <button class="user-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-astronaut me-2 text-secondary"></i>${sessionScope.loginUser.name}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4 p-2">
-                        <li><a class="dropdown-item rounded-3" href="${pageContext.request.contextPath}/kits/my"><i class="fas fa-box-archive me-2 text-primary"></i>Saved Kits</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><button class="dropdown-item rounded-3 text-danger" onclick="logout()"><i class="fas fa-power-off me-2"></i>Log Out</button></li>
-                    </ul>
                 </div>
             </c:if>
         </div>
@@ -236,9 +239,11 @@
             </div>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="saveKit()">
-                    <i class="fas fa-cloud-arrow-up me-2"></i>Save Kit
-                </button>
+                <c:if test="${not empty sessionScope.loginUser}">
+                    <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="saveKit()">
+                        <i class="fas fa-cloud-arrow-up me-2"></i>Save Kit
+                    </button>
+                </c:if>
 
                 <button id="btnCheck" class="btn-check-main" onclick="runSecurityCheck()">
                     <i class="fas fa-shield-virus me-2"></i>Run Audit
@@ -540,7 +545,6 @@
         function saveKit() {
             if ("${sessionScope.loginUser}" === "") {
                 alert("로그인이 필요한 서비스입니다.");
-                // [수정] 자바스크립트 이동 경로: contextPath 사용
                 location.href = contextPath + "/login";
                 return;
             }
@@ -582,7 +586,6 @@
                         render();
                     } else if (msg === 'LOGIN_REQUIRED') {
                         alert("로그인이 필요합니다.");
-                        // [수정] contextPath 사용
                         location.href = contextPath + "/login";
                     } else {
                         alert("저장 실패: " + msg);
@@ -602,7 +605,17 @@
             navigator.clipboard.writeText(xml).then(()=>showToast("XML copied to clipboard."));
         }
 
-        function logout() { location.reload(); }
+        // [수정] 로그아웃 로직: 서버 호출 후 메인으로 리다이렉트
+        function logout() {
+            fetch(contextPath + '/api/auth/logout', {
+                method: 'POST'
+            }).then(() => {
+                location.href = contextPath + '/';
+            }).catch(err => {
+                console.error(err);
+                location.href = contextPath + '/';
+            });
+        }
     </script>
 </body>
 </html>

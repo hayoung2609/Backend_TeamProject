@@ -10,12 +10,11 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- Design System (index.jsp와 통일) --- */
+        /* CSS는 index.jsp와 동일하므로 생략 (위의 파일과 같음) */
+        /* ... 기존 스타일 코드 유지 ... */
         :root {
             --bg-body: #f8fafc;
             --surface-color: #ffffff;
@@ -35,14 +34,10 @@
         }
 
         body { background-color: var(--bg-body); color: var(--text-main); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; }
-
-        /* Navbar */
         .navbar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
         .brand-logo { font-family: var(--font-code); font-weight: 700; font-size: 1.35rem; color: var(--primary-dark); letter-spacing: -0.03em; display: flex; align-items: center; gap: 10px; }
         .user-pill { background: #f8fafc; border: 1px solid var(--border-color); padding: 6px 16px; border-radius: 999px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
         .user-pill:hover { border-color: var(--primary-accent); color: var(--primary-accent); }
-
-        /* Left Side: Kit List */
         .kit-list-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-soft); height: calc(100vh - 140px); display: flex; flex-direction: column; }
         .kit-list-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); background: #fff; font-weight: 700; color: var(--primary-dark); }
         .kit-list-body { overflow-y: auto; flex: 1; padding: 0.5rem; }
@@ -52,15 +47,11 @@
         .kit-item.active .kit-title { color: var(--primary-accent); }
         .kit-title { font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 4px; }
         .kit-meta { font-size: 0.8rem; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
-
-        /* Right Side: Detail View */
         .detail-area { height: calc(100vh - 140px); overflow-y: auto; padding-right: 4px; }
         .empty-state { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); text-align: center; }
         .detail-header { background: var(--surface-color); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         .detail-title h2 { font-weight: 800; font-size: 1.5rem; color: var(--primary-dark); margin: 0; letter-spacing: -0.02em; }
         .detail-desc { color: var(--text-sub); margin-top: 4px; font-size: 0.95rem; }
-
-        /* Grid Layout for Dependencies (Same as index.jsp) */
         .dep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding-bottom: 2rem; }
         .dep-item { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; transition: all 0.2s; display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
         .dep-item:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); border-color: #cbd5e1; }
@@ -69,19 +60,14 @@
         .dep-item.safe { background: linear-gradient(to right, var(--success-bg), white 40%); border-color: #bbf7d0; }
         .dep-item.danger::before { background: var(--danger-color); }
         .dep-item.danger { background: linear-gradient(to right, var(--danger-bg), white 40%); border-color: #fecaca; }
-
         .lib-name { font-family: var(--font-code); font-weight: 700; color: var(--primary-dark); font-size: 1rem; word-break: break-all; }
         .lib-group { font-size: 0.8rem; color: var(--text-sub); }
         .ver-badge { font-family: var(--font-code); background: #f1f5f9; color: var(--text-main); padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e2e8f0; }
-
-        /* Buttons */
         .btn-action { padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: 0.2s; border: 1px solid transparent; }
         .btn-outline-custom { background: white; border-color: var(--border-color); color: var(--text-main); }
         .btn-outline-custom:hover { border-color: var(--primary-accent); color: var(--primary-accent); background: #eff6ff; }
         .btn-primary-custom { background: var(--primary-accent); color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25); }
         .btn-primary-custom:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35); color: white; }
-
-        /* Modal & Scrollbar */
         .modal-content { border: none; border-radius: 24px; box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25); }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -102,12 +88,16 @@
         </a>
         <div class="d-flex align-items-center gap-3">
             <c:if test="${not empty sessionScope.loginUser}">
+                <a class="btn btn-light rounded-pill border fw-medium text-secondary me-2" href="${pageContext.request.contextPath}/kits/my">
+                    <i class="fas fa-box-archive me-2 text-primary"></i>My Kit
+                </a>
+
                 <div class="dropdown">
                     <button class="user-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-astronaut me-2 text-secondary"></i>${sessionScope.loginUser.name}
+                        <i class="fas fa-user-astronaut me-2 text-secondary"></i>${sessionScope.loginUser.nickname}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4 p-2">
-                        <li><a class="dropdown-item rounded-3 active" href="#"><i class="fas fa-box-archive me-2"></i>Saved Kits</a></li>
+                        <li><a class="dropdown-item rounded-3 active" href="#"><i class="fas fa-box-archive me-2"></i>My Kit</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item rounded-3 text-danger" onclick="logout()"><i class="fas fa-power-off me-2"></i>Log Out</button></li>
                     </ul>
@@ -227,14 +217,13 @@
         </div>
     </div>
 </div>
-
 <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const contextPath = "${pageContext.request.contextPath}";
     let currentItems = [];
-    let currentKitId = null; // [추가됨] 현재 선택된 Kit ID 저장용
+    let currentKitId = null;
     const vulnModal = new bootstrap.Modal(document.getElementById('vulnModal'));
 
     function showToast(msg, type='success') {
@@ -253,14 +242,24 @@
         setTimeout(() => el.remove(), 3500);
     }
 
+    // [수정] 로그아웃 로직 (서버 연동)
+    function logout() {
+        fetch(contextPath + '/api/auth/logout', {
+            method: 'POST'
+        }).then(() => {
+            location.href = contextPath + '/';
+        }).catch(err => {
+            console.error(err);
+            location.href = contextPath + '/';
+        });
+    }
+
     // Kit 상세 불러오기
     function loadKitDetail(kitId, el) {
         currentKitId = kitId;
-        // UI 활성화 처리
         document.querySelectorAll('.kit-item').forEach(i => i.classList.remove('active'));
         if(el) el.classList.add('active');
 
-        // 로딩 중 표시 (간단히)
         document.getElementById('emptyState').style.display = 'none';
         const detailArea = document.getElementById('detailArea');
         detailArea.style.display = 'block';
@@ -270,12 +269,8 @@
             .then(res => res.json())
             .then(data => {
                 if (!data) { showToast("데이터를 불러올 수 없습니다.", "error"); return; }
-
-                // 메타데이터 바인딩
                 document.getElementById('viewTitle').innerText = data.title || "Untitled Kit";
                 document.getElementById('viewDesc').innerText = data.description || "No description provided.";
-
-                // 아이템 목록 바인딩
                 currentItems = data.itemList || [];
                 renderItems();
             })
@@ -289,14 +284,12 @@
         const grid = document.getElementById('depGrid');
         document.getElementById('itemCount').innerText = currentItems.length + ' items';
         grid.innerHTML = '';
-
         if(currentItems.length === 0) {
             grid.innerHTML = '<div class="col-12 text-center text-muted py-4">아이템이 없습니다.</div>';
             return;
         }
 
         currentItems.forEach((item, idx) => {
-            // 초기 상태는 'unknown'으로 간주하거나, 이미 진단된 상태라면 표시
             let statusBadge = '<span class="badge bg-light text-secondary border fw-medium"><i class="fas fa-hourglass-half me-1"></i>Pending</span>';
             let rowClass = '';
             let actionBtn = '';
@@ -327,10 +320,8 @@
         });
     }
 
-    // 보안 진단 실행
     async function runSecurityAudit() {
         if(currentItems.length === 0) return;
-
         const btn = document.getElementById('btnAudit');
         const orgHtml = btn.innerHTML;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Scanning...';
@@ -363,7 +354,6 @@
         showToast("Audit completed.");
     }
 
-    // 모달 열기
     function openModal(idx) {
         const item = currentItems[idx];
         document.getElementById('modalTitle').innerText = `\${item.artifactId} (\${item.version})`;
@@ -372,7 +362,6 @@
         vulnModal.show();
     }
 
-    // XML 복사
     function copyXml() {
         if(currentItems.length === 0) return;
         let xml = "<dependencies>\n";
@@ -383,44 +372,32 @@
         navigator.clipboard.writeText(xml).then(()=>showToast("XML copied to clipboard."));
     }
 
-    function logout() {
-        // [수정] 메인 화면(root)으로 이동
-        location.href = contextPath + '/';
-    }
-
-    // [추가됨] Kit 수정 (간단한 프롬프트 활용)
     function updateKit() {
         if(!currentKitId) {
             showToast("선택된 Kit이 없습니다.", "error");
             return;
         }
-
-        // 현재 화면에 있는 값 가져오기
         const currentTitle = document.getElementById('viewTitle').innerText;
         const currentDesc = document.getElementById('viewDesc').innerText;
-
-        // 수정 입력 받기
         const newTitle = prompt("수정할 제목을 입력하세요:", currentTitle);
-        if(newTitle === null) return; // 취소 시 중단
-
+        if(newTitle === null) return;
         const newDesc = prompt("수정할 설명을 입력하세요:", currentDesc);
         if(newDesc === null) return;
 
-        // AJAX 요청 (PUT)
         fetch(contextPath + '/kits/' + currentKitId, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title: newTitle,
                 description: newDesc,
-                isPublic: true // 기본값 유지
+                isPublic: true
             })
         })
             .then(res => res.text())
             .then(msg => {
                 if(msg === 'OK') {
                     alert("수정되었습니다.");
-                    location.reload(); // 목록 갱신을 위해 새로고침
+                    location.reload();
                 } else {
                     alert("수정 실패: " + msg);
                 }
@@ -431,16 +408,12 @@
             });
     }
 
-    // [추가됨] Kit 삭제
     function deleteKit() {
         if(!currentKitId) {
             showToast("선택된 Kit이 없습니다.", "error");
             return;
         }
-
         if(!confirm("정말로 이 Kit를 삭제하시겠습니까?")) return;
-
-        // AJAX 요청 (DELETE)
         fetch(contextPath + '/kits/' + currentKitId, {
             method: 'DELETE'
         })
@@ -448,7 +421,7 @@
             .then(msg => {
                 if(msg === 'OK') {
                     alert("삭제되었습니다.");
-                    location.reload(); // 목록 갱신
+                    location.reload();
                 } else {
                     alert("삭제 실패: " + msg);
                 }

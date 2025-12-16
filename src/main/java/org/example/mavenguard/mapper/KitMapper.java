@@ -3,33 +3,32 @@ package org.example.mavenguard.mapper;
 import org.example.mavenguard.vo.KitItemVO;
 import org.example.mavenguard.vo.KitVO;
 import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 
 public interface KitMapper {
 
-    // 1. Kit 메인 정보 저장 (저장 후 PK인 kitId를 vo에 담아줌)
+    // 1. Kit 저장
     void insertKit(KitVO kitVO);
-
-    // 2. Kit 아이템(라이브러리들) 저장
     void insertKitItem(KitItemVO itemVO);
 
-    // 3. 내 Kit 목록 조회
+    // 2. 조회
     List<KitVO> selectKitsByUserId(Long userId);
-    KitVO selectKitById(Long kitId);
-
-    // 4. 특정 Kit의 아이템들 조회
     List<KitItemVO> selectItemsByKitId(Long kitId);
 
-    // 5. ⭐ 내 Kit인지 검증 (추가 — 이거 없어서 에러 났던 것)
-    int countMyKit(@Param("userId") Long userId,
-                   @Param("kitId") Long kitId);
+    // 상세 조회 (이전 단계에서 추가했던 것)
+    KitVO selectKitById(Long kitId);
 
-    // 6. Kit 수정
+    // 3. 검증
+    int countMyKit(@Param("userId") Long userId, @Param("kitId") Long kitId);
+
+    // 4. 수정/삭제
     void updateKit(KitVO kitVO);
-
-    // 7. Kit 삭제
     void deleteKit(@Param("kitId") Long kitId, @Param("userId") Long userId);
     void deleteKitItems(Long kitId);
-}
 
+    // [추가] 전체 Kit 조회 (관리자용 - 모든 사용자의 Kit)
+    List<KitVO> selectAllKitsAdmin();
+
+    // [추가] Kit 강제 삭제 (관리자용 - 소유자 확인 없이)
+    void deleteKitByAdmin(Long kitId);
+}

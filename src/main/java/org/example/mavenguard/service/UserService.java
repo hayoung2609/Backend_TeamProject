@@ -36,7 +36,13 @@ public class UserService {
         return user; // 로그인 성공
     }
 
-    List<UserVO> getAllUsers(){
+    public List<UserVO> getAllUsers(){
         return userMapper.selectAllUsers();
+    }
+    public void updateUserRole(Long userId, String role) {
+        userMapper.updateUserRole(userId, role);
+    }
+    public void deleteUser(Long userId) {
+        userMapper.deleteUser(userId);
     }
 }

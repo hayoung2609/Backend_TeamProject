@@ -86,6 +86,15 @@ public class KitService {
         // 2. 메인 Kit 삭제
         kitMapper.deleteKit(kitId, userId);
     }
+    public List<KitVO> getAllKitsForAdmin() {
+        return kitMapper.selectAllKitsAdmin();
+    }
+
+    @Transactional
+    public void deleteKitByAdmin(Long kitId) {
+        kitMapper.deleteKitItems(kitId); // 아이템 먼저 삭제
+        kitMapper.deleteKitByAdmin(kitId); // Kit 삭제
+    }
 }
 
 
