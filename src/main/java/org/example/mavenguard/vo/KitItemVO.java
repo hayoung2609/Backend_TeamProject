@@ -10,3 +10,4 @@ public class KitItemVO {
     private String artifactId;
     private String version;
 }
+
