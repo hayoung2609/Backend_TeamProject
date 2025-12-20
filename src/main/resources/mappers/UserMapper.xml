@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.mavenguard.mapper.UserMapper">
+
+    <insert id="insertUser"
+            parameterType="org.example.mavenguard.vo.UserVO"
+            useGeneratedKeys="true"
+            keyProperty="userId">
+        INSERT INTO kit_user (email, password, nickname, role)
+        VALUES (#{email}, #{password}, #{nickname}, 'ROLE_USER')
+    </insert>
+
+    <select id="selectByEmail"
+            parameterType="string"
+            resultType="org.example.mavenguard.vo.UserVO">
+        SELECT
+            user_id   AS userId,
+            email,
+            password,
+            nickname,
+            role,
+            created_at AS createdAt
+        FROM kit_user
+        WHERE email = #{email}
+    </select>
+
+    <select id="selectAllUsers" resultType="org.example.mavenguard.vo.UserVO">
+        SELECT user_id AS userId, email, nickname, role, created_at AS createdAt
+        FROM kit_user
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="updateUserRole">
+        UPDATE kit_user SET role = #{role} WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteUser">
+        DELETE FROM kit_user WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
